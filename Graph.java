@@ -1,226 +1,174 @@
-package com.mycompany.cpcs324_projectp1;
+
+package graphFramework;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.Scanner;
+import AlgorithmProjectPart2.AFRouteMap;
 
-//-------------------------------------------------------------------------------------------------
+
+
+
 public class Graph {
-    private int verticesNo = 0;
-    private int edgeNo;
-    private boolean isDigraph;
-    private List<Vertex> vertices;
 
-    public Graph() {
-        this.verticesNo = 0;
-        this.edgeNo = 0;
-        this.isDigraph = false;
-        this.vertices = new ArrayList<>();
+// Data Fields
+public int numberOfVertices;
+int numberOfEdges;
+boolean isDirected;
+public Vertex[] vertices;
+
+
+/**
+ * Constructor to be used for the Make Graph function.
+ * Constructs a graph with the specified number of vertices, edges, and whether it is directed or not.
+ * @param numberOfVertices The number of vertices in the graph.
+ * @param numberOfEdges The number of edges in the graph.
+ * @param isDirected Indicates if the graph is directed or not.
+ */
+public Graph(int numberOfVertices, int numberOfEdges, boolean isDirected) {
+    this.numberOfVertices = numberOfVertices;
+    this.numberOfEdges = numberOfEdges;
+    this.isDirected = isDirected;
+    this.vertices = new Vertex[numberOfVertices];
+}
+
+/**
+ * Constructor to be used for the Read Graph from File function.
+ */
+public Graph() {
+}
+
+/**
+ * Creates a new vertex with the given label.
+ * @param label The label of the vertex.
+ * @return The created vertex.
+ */
+public Vertex createVertex(int label) {
+    return new Vertex(label);
+}
+
+/**
+ * Creates a new edge with the given source, target, and weight.
+ * @param source The source vertex of the edge.
+ * @param target The target vertex of the edge.
+ * @param weight The weight of the edge.
+ * @return The created edge.
+ */
+public Edge createEdge(Vertex source, Vertex target, int weight) {
+    return new Edge(source, target, weight);
+}
+
+/**
+ * Adds an edge to the graph between the given vertices with the specified weight.
+ * If the graph is undirected, it adds the opposite edge as well.
+ * @param v The index of the source vertex.
+ * @param u The index of the target vertex.
+ * @param weight The weight of the edge.
+ * @return The created edge.
+ */
+public Edge addEdge(int v, int u, int weight) {
+    Graph g = new AFRouteMap();
+
+    // Check if the vertices[v] is null to avoid duplicates
+    if (vertices[v] == null) {
+        numberOfVertices++; // Increment the number of vertices first to avoid size problems
+        vertices[v] = g.createVertex(v); // Create a new source vertex in the array of vertices
     }
-    
-    public Graph(int verticesNo, int edgeNo) { 
-     this.edgeNo = edgeNo; 
-     this.verticesNo = verticesNo; 
- 
-    } 
-    
-    public void setIsDigraph(boolean isDigraph) { 
-        this.isDigraph = isDigraph; 
-    } 
- 
-    public void setVerticesNo(int verticesNo) { 
-        this.verticesNo = verticesNo; 
-    } 
- 
-    public void setEdgeNo(int edgeNo) { 
-        this.edgeNo = edgeNo; 
-    } 
- 
-    public int getEdgeNo() { 
-        return edgeNo; 
-    } 
- 
-    
-//-------------------------------------------------------------------------------------------------
-public void makeGraph(int numVertices, int numEdges, boolean isDigraph) {
-    vertices.clear(); // Clear the vertices list before creating a new graph
-     int verticesNo = numVertices;
-     int edgesNo = numEdges;
 
-        int edgeCount = 0;
-        
-
-
-        for (int i = 0; i < verticesNo; i++) {//While loop \ 
-            vertices.add(new Vertex(Integer.toString(i))); // to fill vertices array with all expected verexices 
-            //vertices.get(i).setKey(i); 
-            System.out.println(vertices.get(i).getKey()); 
-        } 
-        int sLabel; 
-        int tLabel;
-    // Create vertices with random labels
-    for (int i = 0; i < numVertices; i++) {
-        String label = generateRandomLabel();
-        Vertex vertex = new Vertex(label);
-        vertices.add(vertex);
+    // Check if the vertices[u] is null to avoid duplicates
+    if (vertices[u] == null) {
+        numberOfVertices++; // Increment the number of vertices first to avoid size problems
+        vertices[u] = g.createVertex(u); // Create a new target vertex in the array of vertices
     }
-    
-          // System.out.println("looop"); 
-        //System.out.println("Edge no " + edgesNo); 
-        for (int i = 0; i < edgesNo; i++) { 
-            sLabel = (int) (Math.random() * verticesNo); 
-            tLabel = (int) (Math.random() * verticesNo); 
- 
-            int weight = (int) (1 + Math.random() * 20); 
- 
-            // System.out.println("sLabel " + sLabel + " tLabel " + tLabel); 
-if ((sLabel == tLabel) || vertices.get(sLabel).searchForVertex(tLabel)) {
-    // Since this iteration should not be counted, decrease i
-    // System.out.println("ignore " + sLabel + " and " + tLabel);
 
-    i--;
-    continue; // Skip this iteration
-}
-Edge edge = new Edge(vertices.get(sLabel),vertices.get(tLabel), weight);
-vertices.get(sLabel).getAdjList().add(edge);
+    // Create a new edge
+    Edge newEdge = g.createEdge(vertices[v], vertices[u], weight);
+    numberOfEdges++; // Increase the number of edges
 
-edge = new Edge(vertices.get(sLabel),vertices.get(tLabel), weight);
-vertices.get(tLabel).getAdjList().add(edge);
+    // Access the vertex's adjacent list and add the edge with its weight
+    vertices[v].adjList.add(newEdge);
 
-edgeCount++;
+    // If the graph is undirected
+    if (!isDirected) {
+        // Add the opposite edge (undirected)
+        newEdge = g.createEdge(vertices[u], vertices[v], weight);
+        numberOfEdges++; // Increase the number of edges
 
-
-        } 
-        
-        
-        
-System.out.println("MAKE GRAPH RESULT");
-for (int i = 0; i < vertices.size(); i++) {
-    System.out.println("Source " + vertices.get(i).getLabel());
-    for (int j = 0; j < vertices.get(i).getAdjList().size(); j++) {
-        System.out.println("  Target: " + vertices.get(i).getAdjList().get(j).getTargetVertex().getLabel() + ", Weight: " + vertices.get(i).getAdjList().get(j).getWeight());
+        // Access the vertex's adjacent list and add the edge with its weight
+        vertices[u].adjList.add(newEdge);
     }
+
+    return newEdge;
 }
 
- 
-//        System.out.println("inner "+ inner); 
-        System.out.println("edgeCount " + edgeCount); 
-  
-    } 
+/**
+ * Reads a graph from a file and initializes the graph accordingly.
+ * @param fileName The name of the file to read from.
+ * @throws FileNotFoundException If the file is not found.
+ */
+public void readGraphFromFile(File fileName) throws FileNotFoundException {
+    Scanner input = new Scanner(fileName);
 
+    String graphType = input.nextLine();
+    if (graphType.equalsIgnoreCase("digraph 0")) {
+        isDirected = false;
+    } else if (graphType.equalsIgnoreCase("digraph 1")) {
+        isDirected = true;
+    }
 
-//-------------------------------------------------------------------------------------------------
+    int totalNumberOfVertices = input.nextInt();
+    int totalNumberOfEdges = input.nextInt();
 
-public void readGraphFromFile(String fileName) throws FileNotFoundException {
-    File file = new File(fileName);
-    Scanner scanner = new Scanner(file);
+    if (!isDirected) {
+        totalNumberOfEdges *= 2;
+    }
 
-    String type = scanner.nextLine(); // Read the type of graph (graph or digraph)
-    isDigraph = type.equalsIgnoreCase("digraph");
-    System.out.println(type);
-    verticesNo = scanner.nextInt();
-    edgeNo = scanner.nextInt();
-    scanner.nextLine();
-    // Second loop for adding edges
-while (scanner.hasNextLine()) {
-    String line = scanner.nextLine(); // Read the entire line
-    String[] parts = line.split(" ");
-    String sourceLabel = parts[0]; // Extract the source label
-    String targetLabel = parts[1]; // Extract the target label
-    int weight = Integer.parseInt(parts[2]); // Extract the weight and convert it to an integer
-    
-    Vertex sourceVert = getVertexByLabel(sourceLabel);
-    Vertex targetVert = getVertexByLabel(targetLabel);
-    addEdge(sourceVert, targetVert, weight);
-    
-        System.out.println("Source Vertex: " + sourceLabel);
-        System.out.println("Target Vertex: " + targetLabel);
-       // System.out.println("Parent Vertex: " + parentVertex.getLabel());
-        System.out.println("Weight: " + weight);
-    
-}
+    vertices = new Vertex[totalNumberOfVertices];
+
+    while (numberOfEdges < totalNumberOfEdges) {
+        char source = input.next().charAt(0);
+        char destination = input.next().charAt(0);
+        int weight = input.nextInt();
+
+        addEdge(source - 65, destination - 65, weight);
+    }
+
+    input.close();
 }
 
+/**
+ * Constructs a graph with the specified number of vertices and edges.
+ * The graph is randomly initialized with vertices' labels, randomly connects the vertices with edges,
+ * and assigns random weights to the edges. The resulting graph is connected.
+ * @param numberOfVertices The number of vertices in the graph.
+ * @param numberOfEdges The number of edges in the graph.
+ */
+public void makeGraph(int numberOfVertices, int numberOfEdges) {
+    for (int i = 0; i < numberOfVertices; i++) {
+        vertices[i] = new Vertex(i);
+    }
 
+    for (int i = 0; i < numberOfVertices - 1; i++) {
+        addEdge(vertices[i].label, vertices[i + 1].label, (int) (1 + Math.random() * 10));
+    }
 
-//-------------------------------------------------------------------------------------------------
-    
-private void addEdge(Vertex sourceVert, Vertex targetVert, int weight) {
-    if (sourceVert != null && targetVert != null) {
-        Edge edge = new Edge(sourceVert, targetVert, weight);
-        sourceVert.getAdjList().add(edge);
+    int i = 0;
+    while (i < (numberOfEdges - (numberOfVertices - 1))) {
+        int vertexU = (int) (Math.random() * numberOfVertices);
+        int vertexV = (int) (Math.random() * numberOfVertices);
 
-        if (!isDigraph) {
-            edge = new Edge(targetVert, sourceVert, weight);
-            targetVert.getAdjList().add(edge);
+        if (vertexU == vertexV) {
+            continue;
         }
-    }
-}
-//-------------------------------------------------------------------------------------------------
-private String generateRandomLabel() {
-    Random random = new Random();
-    int alphabetSize = 26; // Total number of letters in the alphabet
-    char randomLetter = (char) ('A' + random.nextInt(alphabetSize)); // Generate a random letter from A to Z
-    return String.valueOf(randomLetter); // Convert the letter to a string and return it as the label
-}
 
-//-------------------------------------------------------------------------------------------------
-    private void connectGraph() {
-        // Connect the graph to ensure it is connected
-        // You can implement your own logic here based on the graph requirements
-        // This is just a simple example to connect all vertices together
-
-        for (int i = 0; i < verticesNo - 1; i++) {
-            addEdge(vertices.get(i), vertices.get(i + 1), generateRandomWeight());
+        for (int j = 0; j < vertices[vertexU].adjList.size(); j++) {
+            if (vertices[vertexU].adjList.get(j).target.label != vertexV) {
+                break;
+            }
         }
-        if (!isDigraph) {
-            addEdge(vertices.get(verticesNo - 1), vertices.get(0), generateRandomWeight());
-        }
+
+        addEdge(vertices[vertexU].label, vertices[vertexV].label, (int) (1 + Math.random() * 10));
+        i++;
     }
-//-------------------------------------------------------------------------------------------------
-public Vertex getVertexByLabel(String label) {
-    for (Vertex vertex : vertices) {
-        if (vertex.getLabel().equals(label)) {
-            return vertex;
-        }
-    }
-    return null; // Vertex with the specified label not found
 }
-
-
-    public int getVerticesNo() { 
-        return verticesNo; 
-    } 
- 
-    public int getVerticesSize() { 
-        return vertices.size(); 
-    } 
- 
-    public Vertex getVertex(int inx) { 
-        return vertices.get(inx); 
-    } 
-
- int generateRandomWeight() {
-    Random random = new Random();
-    return random.nextInt(10) + 1; // Random weight from 1 to 10
-}
-    public List<Vertex> getVertices() {
-        return vertices;
-    }
-
-
-
-public Vertex getVertexByNo(int i) {
-    String label = String.valueOf((char) ('A' + i));
-    for (Vertex element : vertices) {
-        if (element.getLabel().equals(label)) {
-            return element;
-        }
-    }
-    return null;
-}
-
 }
